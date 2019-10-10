@@ -1,0 +1,141 @@
+Question 1
+
+Diagram can be viewed with this link
+https://drive.google.com/file/d/1lZi0pLKzr7YnZC-p1Jp1WwA9ZcmhNwIi/view?usp=sharing
+
+
+Question 2
+
+SELECT namefirst, namelast, hof_inducted.inducted
+FROM people LEFT OUTER JOIN hof_inducted
+ON people.playerid = hof_inducted.playerid; 
+
+Question 3
+
+SELECT namefirst, namelast, birthyear, deathyear, birthcountry
+FROM people JOIN hof_inducted
+ON people.playerid = hof_inducted.playerid
+WHERE hof_inducted.votedby = 'Negro League' AND hof_inducted.yearid = 2006;
+
+Question 4
+
+SELECT salaries.yearid, salaries.playerid, teamid, salary, hof_inducted.category
+FROM salaries JOIN hof_inducted
+ON salaries.playerid = hof_inducted.playerid;
+
+Question 5
+
+SELECT salaries.yearid, salaries.playerid, teamid, lgid, salary, inducted
+FROM salaries FULL OUTER JOIN hof_inducted
+ON salaries.playerid = hof_inducted.playerid;
+
+Question 6
+
+-- part 1
+
+SELECT * FROM hof_inducted 
+UNION ALL
+SELECT * FROM hof_not_inducted
+
+-- part 2
+
+WITH put_up AS
+(
+	SELECT * FROM hof_inducted 
+	UNION ALL
+	SELECT * FROM hof_not_inducted
+)
+
+SELECT DISTINCT(playerid)
+FROM put_up;
+
+Question 7
+
+SELECT namelast, namefirst, SUM(salary)
+FROM salaries LEFT OUTER JOIN people
+ON salaries.playerid = people.playerid
+GROUP BY namelast, namefirst;
+
+Question 8
+
+SELECT hof_inducted.playerid, yearid, namefirst, namelast
+FROM hof_inducted LEFT OUTER JOIN people
+ON hof_inducted.playerid = people.playerid
+
+UNION ALL
+
+SELECT hof_not_inducted.playerid, yearid, namefirst, namelast
+FROM hof_not_inducted LEFT OUTER JOIN people
+ON hof_not_inducted.playerid = people.playerid
+
+Question 9
+
+SELECT CONCAT(namelast, ', ', namefirst) as fullname, yearid, inducted
+FROM hof_inducted JOIN people
+ON people.playerid = hof_inducted.playerid
+WHERE yearid >= 1980
+
+UNION ALL
+
+SELECT CONCAT(namelast, ', ', namefirst) as fullname, yearid, inducted
+FROM hof_not_inducted JOIN people
+ON people.playerid = hof_not_inducted.playerid
+WHERE yearid >= 1980
+
+ORDER BY yearid, inducted DESC, fullname;
+
+Question 10
+
+SELECT yearid, teamid, salaries.playerid, namelast, namefirst, salary
+FROM salaries LEFT OUTER JOIN people
+	 ON salaries.playerid = people.playerid
+WHERE salary IN
+	(SELECT MAX(salary)
+	FROM salaries
+	GROUP BY yearid, teamid)
+ORDER BY salary DESC;
+
+Question 11
+
+SELECT birthyear, deathyear, namefirst, namelast
+FROM people
+WHERE birthyear > ANY(SELECT birthyear
+					  FROM people
+					  WHERE playerid = 'ruthba01')
+ORDER BY birthyear;
+
+Question 12
+
+SELECT namefirst, namelast,
+CASE
+	WHEN birthcountry = 'USA' THEN 'USA'
+	ELSE 'non-USA'
+END AS usaborn
+FROM people
+ORDER BY usaborn;
+
+Question 13
+
+SELECT
+AVG(CASE WHEN throws = 'R' THEN height END) AS right_height,
+AVG(CASE WHEN throws = 'L' THEN height END) AS left_height
+FROM people;
+
+Question 14
+
+WITH team_max_salary AS
+(
+	SELECT MAX(salary) AS max_salary, teamid, yearid
+	FROM salaries
+	WHERE yearid > 2010
+	GROUP BY teamid, yearid
+)
+
+SELECT AVG(max_salary), teamid
+FROM team_max_salary
+GROUP BY teamid;
+
+-- I thought this question was worded funny. I got the average for the max salary for each team individually for every year 
+-- since 2010.
+
+
